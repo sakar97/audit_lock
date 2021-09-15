@@ -1,0 +1,16 @@
+---
+
+ - name: "Ensure following lines are there in audit"
+   lineinfile:
+    name: /etc/audit/rules.d/audit.rules
+    line: -a always,exit -F path=/usr/bin/umount -F auid>=1000 -F auid!=unset -k privileged-mount
+    state: present
+   check_mode: yes
+   register: audit
+
+ - name: "Ensure following lines are there in audit"
+   lineinfile:  
+    name: /etc/audit/rules.d/audit.rules
+    line: -a always,exit -F path=/usr/bin/umount -F auid>=1000 -F auid!=unset -k privileged-mount
+   when: (audit is changed) or (audit is failed)
+   notify: Restart auditd

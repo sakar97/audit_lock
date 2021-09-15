@@ -1,0 +1,10 @@
+---
+# handlers file for lock
+  - name: Restart sshd
+    service:
+      name: sshd
+      state: restarted
+  - name: Restart auditd
+    service:
+       name: auditd
+       state: restarted

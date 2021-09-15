@@ -1,0 +1,46 @@
+---
+     - name: "Ensure system-auth contains lock details"
+       lineinfile:
+         name: /etc/pam.d/system-auth
+         line: "{{ item }}"
+         state: present
+       check_mode: yes
+       with_items:
+         - auth     required       pam_faillock.so preauth silent audit deny=3 even_deny_root fail_interval=900 unlock_time=900
+         - auth     [default=die]  pam_faillock.so authfail audit deny=3 even_deny_root fail_interval=900 unlock_time=900
+         - account  required       pam_faillock.so
+       register: conf
+
+     - name: add the block if it is not there
+       blockinfile:
+          block: |
+              auth     required       pam_faillock.so preauth silent audit deny=3 even_deny_root fail_interval=900 unlock_time=900
+              auth     [default=die]  pam_faillock.so authfail audit deny=3 even_deny_root fail_interval=900 unlock_time=900
+              account  required       pam_faillock.so
+          path: /etc/pam.d/system-auth
+          marker: ""
+       when: (conf is changed) or (conf is failed)
+       notify: Restart sshd
+
+     - name: "Ensure password-auth contains following lock account details"
+       lineinfile:
+         name: /etc/pam.d/password-auth
+         line: "{{ item }}"
+         state: present
+       check_mode: yes
+       with_items:
+         - auth     required       pam_faillock.so preauth silent audit deny=3 even_deny_root fail_interval=900 unlock_time=900
+         - auth     [default=die]  pam_faillock.so authfail audit deny=3 even_deny_root fail_interval=900 unlock_time=900
+         - account  required       pam_faillock.so
+       register: password_conf
+
+     - name: add the block if it is not there
+       blockinfile:
+          block: |
+              auth     required       pam_faillock.so preauth silent audit deny=3 even_deny_root fail_interval=900 unlock_time=900
+              auth     [default=die]  pam_faillock.so authfail audit deny=3 even_deny_root fail_interval=900 unlock_time=900
+              account  required       pam_faillock.so
+          path: /etc/pam.d/password-auth
+          marker: ""
+       when: (password_conf is changed) or (password_conf is failed)
+       notify: Restart sshd
